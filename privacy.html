@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Collage Widget</title>
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --text: #1c1a17;
+    --muted: #5f5a52;
+    --accent: #9a4f2c;
+    --border: #e7e1d8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16140f;
+      --surface: #1f1c17;
+      --text: #f0ece4;
+      --muted: #a8a196;
+      --accent: #ffb690;
+      --border: #322d25;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 44rem; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .35rem; letter-spacing: -.02em; }
+  h2 { font-size: 1.15rem; margin: 2.25rem 0 .6rem; letter-spacing: -.01em; }
+  .updated { color: var(--muted); font-size: .9rem; margin: 0 0 2rem; }
+  .lede {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem 1.15rem;
+    margin: 0 0 1rem;
+  }
+  ul { padding-left: 1.15rem; }
+  li { margin: .3rem 0; }
+  a { color: var(--accent); }
+  code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: .1em .35em;
+    font-size: .88em;
+  }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: .875rem;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Collage Widget · Last updated 16 July 2026</p>
+
+  <p class="lede">
+    <strong>Collage Widget does not collect, transmit, or store any personal data.</strong>
+    Your photos never leave your device. There are no accounts, no analytics, no
+    advertising, and no tracking of any kind.
+  </p>
+
+  <h2>Your photos</h2>
+  <p>
+    You choose photos through Android's system photo picker, which gives the app
+    access to only the images you select. The app never requests permission to
+    browse your photo library.
+  </p>
+  <p>
+    Every step — removing the background, creating the torn-paper edge, rendering
+    the collage — happens entirely on your device. Selected photos are processed
+    and the resulting cutouts are saved to the app's own private storage, readable
+    only by Collage Widget. Nothing is uploaded anywhere.
+  </p>
+
+  <h2>No internet access</h2>
+  <p>
+    The app does not request the <code>INTERNET</code> permission. It is
+    technically incapable of sending your data anywhere.
+  </p>
+  <p>
+    One clarification in the interest of being precise: the background-removal
+    model is supplied by <strong>Google Play services</strong>, a separate system
+    component, which may download the model to your device once. That download is
+    performed by Google Play services, not by this app, and involves only the
+    model itself — your photos are never sent as part of it. Google Play services
+    is governed by
+    <a href="https://policies.google.com/privacy">Google's Privacy Policy</a>.
+  </p>
+
+  <h2>What is stored on your device</h2>
+  <ul>
+    <li>Your cutouts and any background image you pick, in the app's private storage.</li>
+    <li>Your collage layouts (positions, sizes, rotations), in a local database.</li>
+    <li>Your appearance preferences (theme and accent colour).</li>
+  </ul>
+  <p>
+    None of this is readable by other apps. Uninstalling Collage Widget removes
+    all of it permanently.
+  </p>
+
+  <h2>If you send feedback</h2>
+  <p>
+    The Feedback option in Settings opens your own email app with a message
+    prepared for you. Nothing is sent unless you send it. If you do, we receive
+    what any email includes — your email address and whatever you write — plus
+    the app version, device model and Android version we add to help diagnose the
+    problem. That information is used only to answer you and fix bugs. It is never
+    sold or shared, and you can ask us to delete it at any time.
+  </p>
+
+  <h2>Children</h2>
+  <p>
+    Collage Widget is not directed at children, and since it collects no data, it
+    collects none from children either.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    If this policy changes, the updated version will be posted here with a new
+    date. Any change that affected how data is handled would also ship in an app
+    update.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions about this policy or your privacy:
+    <a href="mailto:bikash13763@gmail.com">bikash13763@gmail.com</a>
+  </p>
+
+  <footer>
+    <a href="./">Collage Widget</a> ·
+    <a href="https://github.com/iota-hq/android-widgets">Source on GitHub</a>
+  </footer>
+</main>
+</body>
+</html>

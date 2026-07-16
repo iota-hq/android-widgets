@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collage Widget</title>
+<meta name="description" content="Turn your photos into hand-torn paper cutouts and arrange them as a collage on your Android home screen. Everything happens on your device.">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --text: #1c1a17;
+    --muted: #5f5a52;
+    --accent: #9a4f2c;
+    --border: #e7e1d8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16140f;
+      --surface: #1f1c17;
+      --text: #f0ece4;
+      --muted: #a8a196;
+      --accent: #ffb690;
+      --border: #322d25;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 3rem 1.25rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 42rem; margin: 0 auto; }
+  h1 { font-size: 2.4rem; line-height: 1.1; margin: 0 0 .5rem; letter-spacing: -.03em; }
+  .tagline { font-size: 1.15rem; color: var(--muted); margin: 0 0 2.5rem; }
+  h2 { font-size: 1.1rem; margin: 2.5rem 0 .75rem; letter-spacing: -.01em; }
+  ul { padding-left: 1.15rem; }
+  li { margin: .4rem 0; }
+  a { color: var(--accent); }
+  .badge {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: .9rem 1.1rem;
+    margin: 1.5rem 0;
+  }
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: .875rem;
+  }
+  footer a { margin-right: 1rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Collage Widget</h1>
+  <p class="tagline">
+    Turn your photos into hand-torn paper cutouts and arrange them as a collage
+    on your Android home screen.
+  </p>
+
+  <p class="badge">
+    <strong>Everything happens on your device.</strong> Photos are never
+    uploaded — the app doesn't even request internet access.
+  </p>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>Pick photos from your gallery.</li>
+    <li>The subject is cut out on-device, with no server involved.</li>
+    <li>Each cutout gets an irregular, hand-torn paper edge.</li>
+    <li>Arrange the pieces — drag, pinch, rotate, resize, layer.</li>
+    <li>Add the finished collage to your home screen as a widget.</li>
+  </ul>
+
+  <h2>Also</h2>
+  <ul>
+    <li>Backgrounds: transparent, your own photo, gradients, or generated paper, cork, wood and linen textures.</li>
+    <li>A live clock overlay, ticked by the system so it costs no battery.</li>
+    <li>Prebuilt templates to start from.</li>
+    <li>Resizable widgets — as many as you like, each with its own collage.</li>
+  </ul>
+
+  <footer>
+    <a href="./privacy.html">Privacy policy</a>
+    <a href="https://github.com/iota-hq/android-widgets">Source on GitHub</a>
+    <a href="mailto:bikash13763@gmail.com">Contact</a>
+  </footer>
+</main>
+</body>
+</html>
