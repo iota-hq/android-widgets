@@ -1,0 +1,29 @@
+*.iml
+.gradle/
+/local.properties
+.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+/app/build/
+
+# Internal working docs — not part of the shipped source.
+/spec.md
+/PHASES.md
+/tested.md
+/tested2.md
+/idea.txt
+/image.png
+
+# Release signing — never commit these.
+# The keystore IS your app's identity on Play: leak it and someone else can ship
+# a "PaperCut update"; lose it and you cannot update your own app (Play App
+# Signing softens that, but only if you enrol). Back it up somewhere safe and
+# offline.
+/keystore.properties
+*.jks
+*.keystore

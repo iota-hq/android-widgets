@@ -1,0 +1,76 @@
+<resources>
+    <string name="app_name">Collage Widget</string>
+    <string name="widget_description">A hand-cut paper collage on your home screen.</string>
+
+    <!-- Home / gallery -->
+    <string name="home_title">Collage Widget</string>
+    <string name="home_empty_title">No collages yet</string>
+    <string name="home_empty_body">Pick some photos and turn them into paper cutouts.</string>
+    <string name="new_collage">New collage</string>
+    <string name="add_photos">Add photos</string>
+
+    <!-- Editor -->
+    <string name="editor_title">Edit collage</string>
+    <string name="add_to_home">Add to home screen</string>
+    <string name="board_settings">Board settings</string>
+    <string name="processing">Cutting out…</string>
+    <string name="processing_batch">Cutting out %1$d of %2$d…</string>
+    <string name="bring_to_front">Bring to front</string>
+    <string name="send_to_back">Send to back</string>
+    <string name="delete_piece">Delete</string>
+    <string name="duplicate_piece">Duplicate</string>
+    <string name="pin_unsupported">This launcher can\'t add widgets automatically. Add Collage Widget from your home screen\'s widget list.</string>
+
+    <!-- Add-to-home explainer -->
+    <string name="add_to_home_title">Adding to your home screen</string>
+    <string name="add_to_home_body">Your phone\'s launcher decides how widgets get placed, and some skins — including MIUI and HyperOS on Xiaomi, Redmi and Poco phones — drop the widget in without drawing it, so it looks like nothing happened.\n\nIf the widget appears blank or missing: press and hold that empty spot on your home screen, tap <b>Edit</b>, and your collage will appear.\n\nThis is the launcher\'s behaviour, not something the app can override.</string>
+    <string name="understood">Understood</string>
+
+    <!-- App settings -->
+    <string name="settings">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_accent">Accent colour</string>
+    <string name="settings_accent_note">Material You follows your wallpaper. Pick a palette to keep it fixed. Your collages are never tinted by this.</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="done">Done</string>
+
+    <!-- Feedback -->
+    <string name="settings_feedback">Feedback</string>
+    <string name="feedback_send">Send feedback</string>
+    <string name="feedback_subtitle">Report a bug or suggest something</string>
+    <string name="feedback_subject">Collage Widget feedback (v%1$s)</string>
+    <string name="feedback_body">\n\n\n---\nApp version: %1$s\nDevice: %2$s\nAndroid: %3$s</string>
+    <string name="feedback_no_mail_app">No email app found. Write to bikash13763@gmail.com</string>
+
+    <!-- About -->
+    <string name="settings_about">About</string>
+    <string name="about_version">Version</string>
+    <string name="about_privacy">Collage Widget cuts out and renders every photo on your device. Nothing is uploaded, and no network is used.</string>
+
+    <!-- Board settings -->
+    <string name="board_shape">Shape</string>
+    <string name="board_corner_radius">Corner radius</string>
+    <string name="board_background">Background</string>
+    <string name="background_none">None</string>
+    <string name="background_gallery">Photo</string>
+    <string name="clock">Clock</string>
+    <string name="clock_format">Format</string>
+    <string name="clock_position">Position</string>
+    <string name="clock_colour">Colour</string>
+    <string name="clock_size">Size</string>
+
+    <!-- Templates -->
+    <string name="templates_title">Start from a template</string>
+
+    <!-- Collage management -->
+    <string name="delete_collage_title">Delete “%1$s”?</string>
+    <string name="delete_collage_body">This removes the collage and its cutouts. Any widget showing it will go blank.</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Widget setup -->
+    <string name="widget_config_title">Choose a collage</string>
+    <string name="widget_config_empty">No collages yet. Open Collage Widget and make one first.</string>
+</resources>
