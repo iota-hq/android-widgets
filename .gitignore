@@ -1,5 +1,6 @@
 *.iml
 .gradle/
+.kotlin/
 /local.properties
 .idea/
 .DS_Store
@@ -7,6 +8,10 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# JVM crash dumps — left behind when a Gradle/Kotlin daemon is killed.
+hs_err_pid*.log
+replay_pid*.log
 *.apk
 *.aab
 /app/build/
