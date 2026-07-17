@@ -9,6 +9,8 @@ import androidx.room.Relation
 import com.papercut.collage.model.BoardAspect
 import com.papercut.collage.model.Collage
 import com.papercut.collage.model.CollagePiece
+import com.papercut.collage.model.OverlayFont
+import com.papercut.collage.model.TextPiece
 
 @Entity(tableName = "collages")
 data class CollageEntity(
@@ -54,10 +56,38 @@ data class PieceEntity(
     val edgeSeed: Long,
 )
 
+@Entity(
+    tableName = "text_pieces",
+    foreignKeys = [
+        ForeignKey(
+            entity = CollageEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["collageId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("collageId")],
+)
+data class TextPieceEntity(
+    @PrimaryKey val id: String,
+    val collageId: String,
+    val text: String,
+    /** [OverlayFont] persisted by name — kept verbatim by the R8 model rule. */
+    val font: String,
+    val color: Int,
+    val sizeFraction: Float,
+    val centerX: Float,
+    val centerY: Float,
+    val rotation: Float,
+    val zIndex: Int,
+)
+
 data class CollageWithPieces(
     @Embedded val collage: CollageEntity,
     @Relation(parentColumn = "id", entityColumn = "collageId")
     val pieces: List<PieceEntity>,
+    @Relation(parentColumn = "id", entityColumn = "collageId")
+    val texts: List<TextPieceEntity>,
 )
 
 // --- Mapping between persistence and domain model ---
@@ -83,6 +113,19 @@ fun CollageWithPieces.toDomain(): Collage = Collage(
             edgeSeed = it.edgeSeed,
         )
     },
+    texts = texts.sortedBy { it.zIndex }.map {
+        TextPiece(
+            id = it.id,
+            text = it.text,
+            font = runCatching { OverlayFont.valueOf(it.font) }.getOrDefault(OverlayFont.CLASSIC),
+            color = it.color,
+            sizeFraction = it.sizeFraction,
+            centerX = it.centerX,
+            centerY = it.centerY,
+            rotation = it.rotation,
+            zIndex = it.zIndex,
+        )
+    },
 )
 
 fun Collage.toEntity(updatedAt: Long = System.currentTimeMillis()) = CollageEntity(
@@ -105,4 +148,17 @@ fun CollagePiece.toEntity(collageId: String) = PieceEntity(
     rotation = rotation,
     zIndex = zIndex,
     edgeSeed = edgeSeed,
+)
+
+fun TextPiece.toEntity(collageId: String) = TextPieceEntity(
+    id = id,
+    collageId = collageId,
+    text = text,
+    font = font.name,
+    color = color,
+    sizeFraction = sizeFraction,
+    centerX = centerX,
+    centerY = centerY,
+    rotation = rotation,
+    zIndex = zIndex,
 )

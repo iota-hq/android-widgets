@@ -8,8 +8,13 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [CollageEntity::class, PieceEntity::class, WidgetBindingEntity::class],
-    version = 5,
+    entities = [
+        CollageEntity::class,
+        PieceEntity::class,
+        TextPieceEntity::class,
+        WidgetBindingEntity::class,
+    ],
+    version = 6,
     exportSchema = false,
 )
 abstract class PaperCutDatabase : RoomDatabase() {
@@ -62,13 +67,43 @@ abstract class PaperCutDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v6 adds user text pieces. Table + index must match Room's expected
+         * schema exactly (NOT NULL, affinities, index name) or validation fails
+         * at open.
+         */
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS text_pieces (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        collageId TEXT NOT NULL,
+                        text TEXT NOT NULL,
+                        font TEXT NOT NULL,
+                        color INTEGER NOT NULL,
+                        sizeFraction REAL NOT NULL,
+                        centerX REAL NOT NULL,
+                        centerY REAL NOT NULL,
+                        rotation REAL NOT NULL,
+                        zIndex INTEGER NOT NULL,
+                        FOREIGN KEY(collageId) REFERENCES collages(id) ON DELETE CASCADE
+                    )
+                    """.trimIndent(),
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_text_pieces_collageId ON text_pieces(collageId)",
+                )
+            }
+        }
+
         fun get(context: Context): PaperCutDatabase =
             instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     PaperCutDatabase::class.java,
                     "papercut.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build().also { instance = it }
             }
     }

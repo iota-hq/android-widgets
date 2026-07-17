@@ -35,8 +35,8 @@ enum class CollageTemplate(
             cornerRadius = 0.25f,
             clock = ClockOverlay(
                 enabled = true,
-                position = OverlayPosition.CENTER,
                 style = ClockStyle.TIME,
+                font = OverlayFont.THIN,
                 sizeFraction = 0.34f,
             ),
         )
@@ -47,8 +47,8 @@ enum class CollageTemplate(
             cornerRadius = 0.3f,
             clock = ClockOverlay(
                 enabled = true,
-                position = OverlayPosition.CENTER,
                 style = ClockStyle.TIME_DATE,
+                font = OverlayFont.SERIF,
                 color = 0xFF1A1A1A.toInt(),
                 sizeFraction = 0.16f,
             ),
@@ -60,7 +60,7 @@ enum class CollageTemplate(
             cornerRadius = 0.2f,
             clock = ClockOverlay(
                 enabled = true,
-                position = OverlayPosition.TOP,
+                posY = 0.16f,
                 style = ClockStyle.TIME,
                 color = 0xFF1A1A1A.toInt(),
                 sizeFraction = 0.12f,
@@ -79,8 +79,9 @@ enum class CollageTemplate(
             cornerRadius = 0.25f,
             clock = ClockOverlay(
                 enabled = true,
-                position = OverlayPosition.BOTTOM,
+                posY = 0.84f,
                 style = ClockStyle.TIME_AMPM,
+                font = OverlayFont.SCRIPT,
                 sizeFraction = 0.18f,
             ),
         )

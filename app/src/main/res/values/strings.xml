@@ -58,9 +58,22 @@
     <string name="background_gallery">Photo</string>
     <string name="clock">Clock</string>
     <string name="clock_format">Format</string>
-    <string name="clock_position">Position</string>
+    <string name="clock_font">Font</string>
+    <string name="clock_drag_hint">Drag the clock on the board to place it anywhere.</string>
     <string name="clock_colour">Colour</string>
     <string name="clock_size">Size</string>
+
+    <!-- Text pieces -->
+    <string name="add_text">Add text</string>
+    <string name="edit_text">Edit text</string>
+    <string name="text_hint">Your text…</string>
+
+    <!-- Layers -->
+    <string name="layers">Layers</string>
+    <string name="layers_empty">Nothing on the board yet.</string>
+    <string name="layer_photo">Photo cutout</string>
+    <string name="move_layer_up">Move up</string>
+    <string name="move_layer_down">Move down</string>
 
     <!-- Templates -->
     <string name="templates_title">Start from a template</string>

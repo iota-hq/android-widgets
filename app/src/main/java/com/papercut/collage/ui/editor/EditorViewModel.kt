@@ -14,6 +14,7 @@ import com.papercut.collage.model.BoardBackground
 import com.papercut.collage.model.ClockOverlay
 import com.papercut.collage.model.Collage
 import com.papercut.collage.model.CollagePiece
+import com.papercut.collage.model.TextPiece
 import com.papercut.collage.render.AlphaCrop
 import com.papercut.collage.render.PaperEdgeProcessor
 import com.papercut.collage.segmentation.SubjectSegmenter
@@ -47,6 +48,12 @@ data class EditorUiState(
     val batchSize: Int = 0,
 ) {
     val isProcessing: Boolean get() = batchSize > 0
+
+    /** The selected photo piece, if the selection is one. */
+    val selectedPiece: CollagePiece? get() = collage.pieces.find { it.id == selectedId }
+
+    /** The selected text piece, if the selection is one. */
+    val selectedText: TextPiece? get() = collage.texts.find { it.id == selectedId }
 }
 
 /**
@@ -72,10 +79,15 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
                 .drop(1) // ignore the initial/loaded value
                 .debounce(500)
                 .collect { collage ->
-                    // Save once there's something worth keeping: a piece, or a
-                    // collage that already exists (opened from Home, or created
-                    // from a template — those carry choices before any photo).
-                    if (collage.pieces.isEmpty() && !_state.value.persisted) return@collect
+                    // Save once there's something worth keeping: a piece or a
+                    // text, or a collage that already exists (opened from Home,
+                    // or created from a template — those carry choices before
+                    // any photo).
+                    if (collage.pieces.isEmpty() && collage.texts.isEmpty() &&
+                        !_state.value.persisted
+                    ) {
+                        return@collect
+                    }
                     repo.save(collage)
                     _state.update { it.copy(persisted = true) }
                     // Any widget showing this collage re-renders with the edit.
@@ -178,6 +190,18 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
     fun setClock(clock: ClockOverlay) =
         _state.update { it.copy(collage = it.collage.copy(clock = clock)) }
 
+    /** Drag delta from the editor board, in board fractions. */
+    fun nudgeClock(dxFrac: Float, dyFrac: Float) {
+        val clock = _state.value.collage.clock
+        if (!clock.enabled) return
+        setClock(
+            clock.copy(
+                posX = (clock.posX + dxFrac).coerceIn(0.02f, 0.98f),
+                posY = (clock.posY + dyFrac).coerceIn(0.02f, 0.98f),
+            ),
+        )
+    }
+
     /** Copies a picked background photo into app storage so it survives. */
     fun setBackgroundFromGallery(uri: Uri) {
         viewModelScope.launch {
@@ -212,36 +236,115 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
             it.copy(
                 centerX = (it.centerX + panXFrac).coerceIn(0f, 1f),
                 centerY = (it.centerY + panYFrac).coerceIn(0f, 1f),
-                // Up to 3× the board width — a piece may overhang the edge. This
-                // cap only became reachable once the editor stopped clamping
-                // pieces to the board (see PieceView's requiredWidth).
-                scale = (it.scale * zoom).coerceIn(0.05f, 3f),
+                // Up to 6× the board width — effectively unlimited. A piece may
+                // cover the whole board and overhang it on every side.
+                scale = (it.scale * zoom).coerceIn(0.05f, 6f),
                 rotation = it.rotation + rotationDeg,
             )
         }
     }
 
-    fun bringToFront(id: String) = updatePiece(id) { it.copy(zIndex = topZ(_state.value.collage) + 1) }
+    // --- Text pieces -------------------------------------------------------
 
-    fun sendToBack(id: String) = updatePiece(id) { it.copy(zIndex = bottomZ(_state.value.collage) - 1) }
+    fun addText(text: String) {
+        if (text.isBlank()) return
+        val piece = TextPiece(text = text.trim(), zIndex = topZ(_state.value.collage) + 1)
+        _state.update { s ->
+            s.copy(
+                collage = s.collage.copy(texts = s.collage.texts + piece),
+                selectedId = piece.id,
+            )
+        }
+    }
+
+    fun updateText(id: String, transform: (TextPiece) -> TextPiece) {
+        _state.update { s ->
+            s.copy(collage = s.collage.copy(texts = s.collage.texts.map {
+                if (it.id == id) transform(it) else it
+            }))
+        }
+    }
+
+    /** Pan/zoom/rotate for a text piece; zoom scales the font size. */
+    fun transformText(id: String, panXFrac: Float, panYFrac: Float, zoom: Float, rotationDeg: Float) {
+        updateText(id) {
+            it.copy(
+                centerX = (it.centerX + panXFrac).coerceIn(0f, 1f),
+                centerY = (it.centerY + panYFrac).coerceIn(0f, 1f),
+                sizeFraction = (it.sizeFraction * zoom).coerceIn(0.03f, 0.6f),
+                rotation = it.rotation + rotationDeg,
+            )
+        }
+    }
+
+    // --- Layering (shared z-order between photos and text) ------------------
+
+    fun bringToFront(id: String) = reZ(id) { topZ(_state.value.collage) + 1 }
+
+    fun sendToBack(id: String) = reZ(id) { bottomZ(_state.value.collage) - 1 }
+
+    /** Swap z with the layer directly above/below — used by the Layers sheet. */
+    fun moveLayer(id: String, up: Boolean) {
+        val c = _state.value.collage
+        val ordered = layersOf(c).sortedBy { it.second }
+        val index = ordered.indexOfFirst { it.first == id }
+        if (index < 0) return
+        val neighbour = if (up) index + 1 else index - 1
+        if (neighbour !in ordered.indices) return
+        val (idA, zA) = ordered[index]
+        val (idB, zB) = ordered[neighbour]
+        // Swap the two z values; if they collide (legacy data), force distinct.
+        val newZA = if (zA == zB) (if (up) zB + 1 else zB - 1) else zB
+        reZ(idA) { newZA }
+        reZ(idB) { zA }
+    }
+
+    /** All layer ids with their z, photos and text together. */
+    private fun layersOf(c: Collage): List<Pair<String, Int>> =
+        c.pieces.map { it.id to it.zIndex } + c.texts.map { it.id to it.zIndex }
+
+    private fun reZ(id: String, newZ: () -> Int) {
+        val c = _state.value.collage
+        when {
+            c.pieces.any { it.id == id } -> updatePiece(id) { it.copy(zIndex = newZ()) }
+            c.texts.any { it.id == id } -> updateText(id) { it.copy(zIndex = newZ()) }
+        }
+    }
 
     fun duplicate(id: String) {
-        val src = _state.value.collage.pieces.find { it.id == id } ?: return
-        val copy = src.copy(
-            id = java.util.UUID.randomUUID().toString(),
-            centerX = (src.centerX + 0.06f).coerceIn(0f, 1f),
-            centerY = (src.centerY + 0.06f).coerceIn(0f, 1f),
-            zIndex = topZ(_state.value.collage) + 1,
-        )
-        _state.update { s ->
-            s.copy(collage = s.collage.copy(pieces = s.collage.pieces + copy), selectedId = copy.id)
+        val s0 = _state.value.collage
+        s0.pieces.find { it.id == id }?.let { src ->
+            val copy = src.copy(
+                id = java.util.UUID.randomUUID().toString(),
+                centerX = (src.centerX + 0.06f).coerceIn(0f, 1f),
+                centerY = (src.centerY + 0.06f).coerceIn(0f, 1f),
+                zIndex = topZ(s0) + 1,
+            )
+            _state.update { s ->
+                s.copy(collage = s.collage.copy(pieces = s.collage.pieces + copy), selectedId = copy.id)
+            }
+            return
+        }
+        s0.texts.find { it.id == id }?.let { src ->
+            val copy = src.copy(
+                id = java.util.UUID.randomUUID().toString(),
+                centerX = (src.centerX + 0.06f).coerceIn(0f, 1f),
+                centerY = (src.centerY + 0.06f).coerceIn(0f, 1f),
+                zIndex = topZ(s0) + 1,
+            )
+            _state.update { s ->
+                s.copy(collage = s.collage.copy(texts = s.collage.texts + copy), selectedId = copy.id)
+            }
         }
     }
 
     fun delete(id: String) {
         _state.update { s ->
             s.copy(
-                collage = s.collage.copy(pieces = s.collage.pieces.filterNot { it.id == id }),
+                collage = s.collage.copy(
+                    pieces = s.collage.pieces.filterNot { it.id == id },
+                    texts = s.collage.texts.filterNot { it.id == id },
+                ),
                 selectedId = null,
             )
         }
@@ -255,8 +358,11 @@ class EditorViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun topZ(c: Collage) = c.pieces.maxOfOrNull { it.zIndex } ?: 0
-    private fun bottomZ(c: Collage) = c.pieces.minOfOrNull { it.zIndex } ?: 0
+    private fun topZ(c: Collage) =
+        (c.pieces.map { it.zIndex } + c.texts.map { it.zIndex }).maxOrNull() ?: 0
+
+    private fun bottomZ(c: Collage) =
+        (c.pieces.map { it.zIndex } + c.texts.map { it.zIndex }).minOrNull() ?: 0
 
     private suspend fun processToPiece(uri: Uri): CollagePiece {
         val ctx = getApplication<Application>()

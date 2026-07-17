@@ -2,9 +2,7 @@ package com.papercut.collage.render
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Typeface
 import com.papercut.collage.model.ClockOverlay
-import com.papercut.collage.model.OverlayPosition
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -37,7 +35,7 @@ object ClockRenderer {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = clock.color
             this.textSize = textSize
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = clock.font.typeface()
             textAlign = Paint.Align.CENTER
             // Matches the shadow baked into the widget layout's TextClocks.
             setShadowLayer(textSize * 0.12f, 0f, textSize * 0.04f, 0x80000000.toInt())
@@ -50,19 +48,36 @@ object ClockRenderer {
 
         val lineHeight = textSize * 1.1f
         val blockHeight = lineHeight * lines.size
-        val margin = shortEdge * 0.06f
 
-        // Top of the text block, per position.
-        val top = when (clock.position) {
-            OverlayPosition.TOP -> margin
-            OverlayPosition.CENTER -> (heightPx - blockHeight) / 2f
-            OverlayPosition.BOTTOM -> heightPx - blockHeight - margin
-        }
+        // The clock centre sits at the stored fraction of the board.
+        val top = clock.posY * heightPx - blockHeight / 2f
+        val centerX = clock.posX * widthPx
 
         lines.forEachIndexed { i, line ->
             // drawText takes a baseline, not a top edge.
             val baseline = top + lineHeight * i - paint.fontMetrics.ascent * 0.86f
-            canvas.drawText(line, widthPx / 2f, baseline, paint)
+            canvas.drawText(line, centerX, baseline, paint)
         }
+    }
+
+    /**
+     * The clock's rendered footprint (width, height) in px — used by the editor
+     * to place the drag handle over the text. Same maths as [draw].
+     */
+    fun measure(widthPx: Int, heightPx: Int, clock: ClockOverlay, is24Hour: Boolean): Pair<Float, Float> {
+        val shortEdge = minOf(widthPx, heightPx)
+        val textSize = shortEdge * clock.sizeFraction
+        val pattern = if (is24Hour) clock.style.pattern24 else clock.style.pattern12
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.textSize = textSize
+            typeface = clock.font.typeface()
+        }
+        val now = Date()
+        val lines = pattern.split("\n").map { line ->
+            runCatching { SimpleDateFormat(line, Locale.getDefault()).format(now) }.getOrDefault("")
+        }
+        val blockWidth = lines.maxOf { paint.measureText(it) }
+        val blockHeight = textSize * 1.1f * lines.size
+        return blockWidth to blockHeight
     }
 }

@@ -1,5 +1,7 @@
 package com.papercut.collage.model
 
+import android.graphics.Typeface
+
 /**
  * A live clock drawn over the collage.
  *
@@ -11,8 +13,15 @@ package com.papercut.collage.model
  */
 data class ClockOverlay(
     val enabled: Boolean = false,
-    val position: OverlayPosition = OverlayPosition.CENTER,
+    /**
+     * Clock centre as fractions of the board (0..1) — free placement, not a
+     * position preset. In the editor the clock is dragged directly; the widget
+     * reproduces the spot with view padding (the only remotable layout knob).
+     */
+    val posX: Float = 0.5f,
+    val posY: Float = 0.5f,
     val style: ClockStyle = ClockStyle.TIME,
+    val font: OverlayFont = OverlayFont.CLASSIC,
     val color: Int = 0xFFFFFFFF.toInt(),
     /** Text size as a fraction of the board's short edge, so it scales with the widget. */
     val sizeFraction: Float = 0.22f,
@@ -22,10 +31,24 @@ data class ClockOverlay(
     }
 }
 
-enum class OverlayPosition(val label: String) {
-    TOP("Top"),
-    CENTER("Middle"),
-    BOTTOM("Bottom"),
+/**
+ * Fonts for the clock and for user text. **System font families only** — the
+ * widget's TextClock gets its typeface from `android:fontFamily` baked into the
+ * layout (RemoteViews can't set a Typeface at runtime), and these families
+ * exist on every device without bundling font files.
+ */
+enum class OverlayFont(val label: String, val familyName: String, val bold: Boolean) {
+    CLASSIC("Classic", "sans-serif", true),
+    THIN("Thin", "sans-serif-thin", false),
+    CONDENSED("Narrow", "sans-serif-condensed", true),
+    SERIF("Serif", "serif", true),
+    MONO("Mono", "monospace", false),
+    SCRIPT("Script", "cursive", false),
+    ;
+
+    /** The same face the widget layout's per-font TextClock uses. */
+    fun typeface(): Typeface =
+        Typeface.create(familyName, if (bold) Typeface.BOLD else Typeface.NORMAL)
 }
 
 /**

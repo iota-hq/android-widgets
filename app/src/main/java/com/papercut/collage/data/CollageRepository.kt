@@ -16,7 +16,11 @@ class CollageRepository(private val dao: CollageDao) {
     suspend fun load(id: String): Collage? = dao.getById(id)?.toDomain()
 
     suspend fun save(collage: Collage) {
-        dao.save(collage.toEntity(), collage.pieces.map { it.toEntity(collage.id) })
+        dao.save(
+            collage.toEntity(),
+            collage.pieces.map { it.toEntity(collage.id) },
+            collage.texts.map { it.toEntity(collage.id) },
+        )
     }
 
     /** Deletes the collage, its pieces (FK cascade), and their cutout files. */
