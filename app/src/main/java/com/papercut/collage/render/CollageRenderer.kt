@@ -47,20 +47,35 @@ object CollageRenderer {
             setShadowLayer(widthPx * 0.02f, 0f, widthPx * 0.008f, 0x66000000)
         }
 
-        collage.pieces.sortedBy { it.zIndex }.forEach { piece ->
-            val bmp = decode(piece.cutoutPath) ?: return@forEach
-            val targetW = piece.scale * widthPx
-            val targetH = targetW * (bmp.height.toFloat() / bmp.width.toFloat())
-
-            val matrix = Matrix().apply {
-                postScale(targetW / bmp.width, targetH / bmp.height)
-                postRotate(piece.rotation, targetW / 2f, targetH / 2f)
-                postTranslate(
-                    piece.centerX * widthPx - targetW / 2f,
-                    piece.centerY * heightPx - targetH / 2f,
-                )
+        // Photos and text share one z-order, so text can sit under a cutout.
+        val layers: List<Any> = (collage.pieces + collage.texts).sortedBy {
+            when (it) {
+                is com.papercut.collage.model.CollagePiece -> it.zIndex
+                is com.papercut.collage.model.TextPiece -> it.zIndex
+                else -> 0
             }
-            canvas.drawBitmap(bmp, matrix, shadow)
+        }
+
+        layers.forEach { layer ->
+            when (layer) {
+                is com.papercut.collage.model.CollagePiece -> {
+                    val bmp = decode(layer.cutoutPath) ?: return@forEach
+                    val targetW = layer.scale * widthPx
+                    val targetH = targetW * (bmp.height.toFloat() / bmp.width.toFloat())
+
+                    val matrix = Matrix().apply {
+                        postScale(targetW / bmp.width, targetH / bmp.height)
+                        postRotate(layer.rotation, targetW / 2f, targetH / 2f)
+                        postTranslate(
+                            layer.centerX * widthPx - targetW / 2f,
+                            layer.centerY * heightPx - targetH / 2f,
+                        )
+                    }
+                    canvas.drawBitmap(bmp, matrix, shadow)
+                }
+                is com.papercut.collage.model.TextPiece ->
+                    TextRenderer.draw(canvas, widthPx, heightPx, layer)
+            }
         }
 
         if (drawClock) {

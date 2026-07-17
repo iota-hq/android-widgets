@@ -4,8 +4,13 @@
 
      The TextClocks on top are the one live element. RemoteViews can't animate,
      but the system ticks TextClock itself — no re-render, no alarm, no battery
-     cost. RemoteViews also can't change layout_gravity at runtime, so each
-     position is its own view and we show one. -->
+     cost.
+
+     Why six of them: RemoteViews can't set a Typeface at runtime, so each font
+     is its own pre-declared view and the updater shows exactly one. Position is
+     free-form: every clock fills the frame with gravity=center, and the updater
+     shifts the centre with asymmetric view padding (setViewPadding is one of
+     the few remotable layout calls). -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -20,12 +25,12 @@
         android:contentDescription="@string/app_name" />
 
     <TextClock
-        android:id="@+id/clock_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_margin="8dp"
+        android:id="@+id/clock_classic"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
+        android:fontFamily="sans-serif"
+        android:textStyle="bold"
         android:includeFontPadding="false"
         android:shadowColor="#80000000"
         android:shadowDx="0"
@@ -35,12 +40,11 @@
         android:visibility="gone" />
 
     <TextClock
-        android:id="@+id/clock_center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="8dp"
+        android:id="@+id/clock_thin"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
+        android:fontFamily="sans-serif-thin"
         android:includeFontPadding="false"
         android:shadowColor="#80000000"
         android:shadowDx="0"
@@ -50,12 +54,55 @@
         android:visibility="gone" />
 
     <TextClock
-        android:id="@+id/clock_bottom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_margin="8dp"
+        android:id="@+id/clock_condensed"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:includeFontPadding="false"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="6"
+        android:textColor="#FFFFFFFF"
+        android:visibility="gone" />
+
+    <TextClock
+        android:id="@+id/clock_serif"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:fontFamily="serif"
+        android:textStyle="bold"
+        android:includeFontPadding="false"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="6"
+        android:textColor="#FFFFFFFF"
+        android:visibility="gone" />
+
+    <TextClock
+        android:id="@+id/clock_mono"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:fontFamily="monospace"
+        android:includeFontPadding="false"
+        android:shadowColor="#80000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="6"
+        android:textColor="#FFFFFFFF"
+        android:visibility="gone" />
+
+    <TextClock
+        android:id="@+id/clock_script"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:fontFamily="cursive"
         android:includeFontPadding="false"
         android:shadowColor="#80000000"
         android:shadowDx="0"

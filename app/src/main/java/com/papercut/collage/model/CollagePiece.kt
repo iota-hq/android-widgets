@@ -56,4 +56,6 @@ data class Collage(
     /** Live clock drawn over the collage; see [ClockOverlay]. */
     val clock: ClockOverlay = ClockOverlay.OFF,
     val pieces: List<CollagePiece> = emptyList(),
+    /** User text baked into the render; see [TextPiece]. Shares z-order with pieces. */
+    val texts: List<TextPiece> = emptyList(),
 )

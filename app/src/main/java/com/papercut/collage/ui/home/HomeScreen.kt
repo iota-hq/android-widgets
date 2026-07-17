@@ -10,15 +10,17 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -96,7 +99,12 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.home_title)) },
+                title = {
+                    Text(
+                        stringResource(R.string.home_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                },
                 actions = {
                     IconButton(onClick = onSettings) {
                         Icon(
@@ -122,12 +130,13 @@ fun HomeScreen(
                 columns = GridCells.Adaptive(minSize = 150.dp),
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                items(collages, key = { it.id }) { collage ->
+                itemsIndexed(collages, key = { _, c -> c.id }) { index, collage ->
                     CollageCard(
                         collage = collage,
+                        index = index,
                         onClick = { onOpenCollage(collage.id) },
                         onLongClick = { pendingDelete = collage },
                     )
@@ -137,11 +146,27 @@ fun HomeScreen(
     }
 }
 
-/** Tap to open, long-press to delete (#6). */
+/**
+ * Tap to open, long-press to delete (#6).
+ *
+ * Cards get a tiny alternating tilt and cycling container tints, so the grid
+ * reads like paper scraps laid on a table rather than a spreadsheet — the same
+ * energy as the collages themselves.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CollageCard(collage: Collage, onClick: () -> Unit, onLongClick: () -> Unit) {
-    Card {
+private fun CollageCard(collage: Collage, index: Int, onClick: () -> Unit, onLongClick: () -> Unit) {
+    val tilt = CARD_TILTS[index % CARD_TILTS.size]
+    val container = when (index % 3) {
+        0 -> MaterialTheme.colorScheme.primaryContainer
+        1 -> MaterialTheme.colorScheme.tertiaryContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+    Card(
+        colors = CardDefaults.cardColors(containerColor = container),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        modifier = Modifier.graphicsLayer { rotationZ = tilt },
+    ) {
         Column(
             modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
         ) {
@@ -154,32 +179,41 @@ private fun CollageCard(collage: Collage, onClick: () -> Unit, onLongClick: () -
             )
             Text(
                 text = collage.name,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             )
         }
     }
 }
+
+/** Small, varied tilts — enough to feel hand-placed, not enough to look broken. */
+private val CARD_TILTS = listOf(-1.4f, 1.1f, 0.8f, -0.9f, 1.6f, -0.6f)
 
 @Composable
 private fun EmptyState(modifier: Modifier = Modifier) {
     Box(modifier = modifier.padding(32.dp), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Icon(
                 Icons.Outlined.Image,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(64.dp).graphicsLayer { rotationZ = -6f },
             )
-            Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.titleLarge)
+            Text(
+                stringResource(R.string.home_empty_title),
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+            )
             Text(
                 stringResource(R.string.home_empty_body),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

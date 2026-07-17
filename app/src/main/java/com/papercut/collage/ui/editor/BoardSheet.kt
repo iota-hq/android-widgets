@@ -38,10 +38,11 @@ import androidx.compose.ui.unit.dp
 import com.papercut.collage.R
 import com.papercut.collage.model.BoardAspect
 import com.papercut.collage.model.BoardBackground
+import androidx.compose.ui.text.font.FontFamily
 import com.papercut.collage.model.ClockOverlay
 import com.papercut.collage.model.ClockStyle
 import com.papercut.collage.model.GradientPreset
-import com.papercut.collage.model.OverlayPosition
+import com.papercut.collage.model.OverlayFont
 import com.papercut.collage.model.TextureKind
 
 /**
@@ -217,20 +218,30 @@ private fun ClockSection(clock: ClockOverlay, onClock: (ClockOverlay) -> Unit) {
         }
     }
 
-    Text(stringResource(R.string.clock_position), style = MaterialTheme.typography.labelLarge)
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OverlayPosition.entries.forEach { position ->
+    Text(stringResource(R.string.clock_font), style = MaterialTheme.typography.labelLarge)
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        OverlayFont.entries.forEach { font ->
             FilterChip(
-                selected = position == clock.position,
-                onClick = { onClock(clock.copy(position = position)) },
-                label = { Text(position.label) },
+                selected = font == clock.font,
+                onClick = { onClock(clock.copy(font = font)) },
+                label = { Text(font.label, fontFamily = FontFamily(font.typeface())) },
             )
         }
     }
 
+    // Position is no longer a preset — the clock is dragged on the board.
+    Text(
+        stringResource(R.string.clock_drag_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
     Text(stringResource(R.string.clock_colour), style = MaterialTheme.typography.labelLarge)
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        CLOCK_COLORS.forEach { colorValue ->
+        OVERLAY_COLORS.forEach { colorValue ->
             val selected = colorValue == clock.color
             Box(
                 modifier = Modifier
@@ -255,17 +266,9 @@ private fun ClockSection(clock: ClockOverlay, onClock: (ClockOverlay) -> Unit) {
     Slider(
         value = clock.sizeFraction,
         onValueChange = { onClock(clock.copy(sizeFraction = it)) },
-        valueRange = 0.08f..0.4f,
+        valueRange = 0.05f..0.5f,
     )
 }
-
-private val CLOCK_COLORS = listOf(
-    0xFFFFFFFF.toInt(),
-    0xFF1A1A1A.toInt(),
-    0xFFF6D365.toInt(),
-    0xFFFF6B6B.toInt(),
-    0xFF4ECDC4.toInt(),
-)
 
 @Composable
 private fun Swatch(

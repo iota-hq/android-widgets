@@ -23,17 +23,29 @@ interface CollageDao {
     @Upsert
     suspend fun upsertPieces(pieces: List<PieceEntity>)
 
+    @Upsert
+    suspend fun upsertTexts(texts: List<TextPieceEntity>)
+
     @Query("DELETE FROM pieces WHERE collageId = :collageId")
     suspend fun clearPieces(collageId: String)
+
+    @Query("DELETE FROM text_pieces WHERE collageId = :collageId")
+    suspend fun clearTexts(collageId: String)
 
     @Query("DELETE FROM collages WHERE id = :id")
     suspend fun deleteCollage(id: String)
 
-    /** Replace a collage and all its pieces atomically. */
+    /** Replace a collage, its pieces, and its text pieces atomically. */
     @Transaction
-    suspend fun save(collage: CollageEntity, pieces: List<PieceEntity>) {
+    suspend fun save(
+        collage: CollageEntity,
+        pieces: List<PieceEntity>,
+        texts: List<TextPieceEntity>,
+    ) {
         upsertCollage(collage)
         clearPieces(collage.id)
         if (pieces.isNotEmpty()) upsertPieces(pieces)
+        clearTexts(collage.id)
+        if (texts.isNotEmpty()) upsertTexts(texts)
     }
 }

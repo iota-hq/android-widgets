@@ -16,7 +16,7 @@ import com.papercut.collage.R
 import com.papercut.collage.data.CollageRepository
 import com.papercut.collage.data.WidgetRepository
 import com.papercut.collage.model.ClockOverlay
-import com.papercut.collage.model.OverlayPosition
+import com.papercut.collage.model.OverlayFont
 import com.papercut.collage.render.CollageRenderer
 import java.io.File
 import java.io.FileOutputStream
@@ -44,7 +44,24 @@ object CollageWidgetUpdater {
     suspend fun update(context: Context, appWidgetId: Int) {
         val manager = AppWidgetManager.getInstance(context)
         val widgetRepo = WidgetRepository.from(context)
-        val collageId = widgetRepo.collageIdFor(appWidgetId)
+        var collageId = widgetRepo.collageIdFor(appWidgetId)
+
+        // The invisible-widget bug, finally: most launchers do NOT launch the
+        // configure activity for a *pinned* widget — they just create it and
+        // broadcast onUpdate. Our pin flow parked the collage id for the config
+        // activity to claim, so on those launchers nothing ever bound the
+        // widget and it rendered empty (reconfiguring via long-press → Edit
+        // *did* open the config activity, which is why that "fixed" it). So an
+        // unbound widget claims the parked pin right here, on whatever
+        // launcher, with no config round-trip.
+        if (collageId == null) {
+            PendingPin.consume(context)?.let { pinned ->
+                widgetRepo.bind(appWidgetId, pinned)
+                collageId = pinned
+                Log.i(TAG, "update($appWidgetId): unbound widget claimed pending pin → $pinned")
+            }
+        }
+
         val collage = collageId?.let { CollageRepository.from(context).load(it) }
 
         val views = RemoteViews(context.packageName, R.layout.widget_collage)
@@ -56,7 +73,12 @@ object CollageWidgetUpdater {
             views.setImageViewBitmap(R.id.collage_image, null)
             hideAllClocks(views)
         } else {
-            val (wPx, hPx) = targetSize(context, manager.getAppWidgetOptions(appWidgetId), collage.aspect.ratio)
+            val options = manager.getAppWidgetOptions(appWidgetId)
+            val (frameW, frameH) = framePx(context, options)
+            // Displayed collage area: the board's aspect fitted inside the frame.
+            // fitCenter scales the bitmap into exactly this rect, clamped or not.
+            val (dispW, dispH) = fitAspect(frameW, frameH, collage.aspect.ratio)
+            val (wPx, hPx) = clampPixels(dispW, dispH)
             // The clock is a live view on top, so the bitmap must not include it.
             val bitmap = CollageRenderer.render(collage, wPx, hPx, drawClock = false)
             Log.i(
@@ -65,7 +87,7 @@ object CollageWidgetUpdater {
                     "bitmap=${wPx}x$hPx clock=${collage.clock.enabled}",
             )
             views.setImageViewBitmap(R.id.collage_image, bitmap)
-            applyClock(context, views, collage.clock, minOf(wPx, hPx))
+            applyClock(context, views, collage.clock, frameW, frameH, dispW, dispH)
             persist(context, widgetRepo, appWidgetId, bitmap)
         }
 
@@ -75,9 +97,12 @@ object CollageWidgetUpdater {
     }
 
     private val clockIds = mapOf(
-        OverlayPosition.TOP to R.id.clock_top,
-        OverlayPosition.CENTER to R.id.clock_center,
-        OverlayPosition.BOTTOM to R.id.clock_bottom,
+        OverlayFont.CLASSIC to R.id.clock_classic,
+        OverlayFont.THIN to R.id.clock_thin,
+        OverlayFont.CONDENSED to R.id.clock_condensed,
+        OverlayFont.SERIF to R.id.clock_serif,
+        OverlayFont.MONO to R.id.clock_mono,
+        OverlayFont.SCRIPT to R.id.clock_script,
     )
 
     private fun hideAllClocks(views: RemoteViews) {
@@ -85,15 +110,28 @@ object CollageWidgetUpdater {
     }
 
     /**
-     * Point the chosen TextClock at the right format and style it. Only these
-     * setters are remotable, which is why position is a choice between three
-     * pre-placed views rather than a gravity change.
+     * Point the right TextClock (one per font — RemoteViews can't set a
+     * Typeface) at the chosen format, then move it to the stored free position.
+     *
+     * Positioning trick: every clock view fills the widget frame with
+     * `gravity=center`, and text centres itself in the *padded* area — so
+     * asymmetric padding shifts the centre anywhere, and `setViewPadding` is
+     * remotable. To put the centre at c in a frame of size W: pad the near side
+     * by |2c − W| and leave the far side at 0.
      */
-    private fun applyClock(context: Context, views: RemoteViews, clock: ClockOverlay, shortEdgePx: Int) {
+    private fun applyClock(
+        context: Context,
+        views: RemoteViews,
+        clock: ClockOverlay,
+        frameW: Int,
+        frameH: Int,
+        dispW: Int,
+        dispH: Int,
+    ) {
         hideAllClocks(views)
         if (!clock.enabled) return
 
-        val id = clockIds[clock.position] ?: return
+        val id = clockIds[clock.font] ?: return
         views.setViewVisibility(id, View.VISIBLE)
         views.setCharSequence(id, "setFormat12Hour", clock.style.pattern12)
         views.setCharSequence(id, "setFormat24Hour", clock.style.pattern24)
@@ -102,8 +140,20 @@ object CollageWidgetUpdater {
         // Size is stored relative to the board so the clock keeps its proportions
         // when the widget is resized. RemoteViews wants sp, so convert px → sp.
         val density = context.resources.displayMetrics.scaledDensity
-        val sizeSp = (shortEdgePx * clock.sizeFraction) / density
+        val sizeSp = (minOf(dispW, dispH) * clock.sizeFraction) / density
         views.setTextViewTextSize(id, TypedValue.COMPLEX_UNIT_SP, sizeSp)
+
+        // posX/posY are fractions of the *collage*, which sits letterboxed in
+        // the frame — map into frame coordinates first.
+        val cx = (frameW - dispW) / 2f + clock.posX * dispW
+        val cy = (frameH - dispH) / 2f + clock.posY * dispH
+        var pl = 0
+        var pt = 0
+        var pr = 0
+        var pb = 0
+        if (cx >= frameW / 2f) pl = (2 * cx - frameW).roundToInt() else pr = (frameW - 2 * cx).roundToInt()
+        if (cy >= frameH / 2f) pt = (2 * cy - frameH).roundToInt() else pb = (frameH - 2 * cy).roundToInt()
+        views.setViewPadding(id, pl, pt, pr, pb)
     }
 
     /**
@@ -145,28 +195,30 @@ object CollageWidgetUpdater {
     }
 
     /**
-     * Widget footprint in px. The options bundle reports dp for the portrait
+     * Widget frame in px. The options bundle reports dp for the portrait
      * (min width / max height) and landscape footprints; we render the portrait
      * one and let `fitCenter` handle the other orientation.
      */
-    private fun targetSize(context: Context, options: Bundle, boardAspect: Float): Pair<Int, Int> {
+    private fun framePx(context: Context, options: Bundle): Pair<Int, Int> {
         val widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
         val heightDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
 
-        var w = dpToPx(context, widthDp).coerceAtLeast(1)
-        var h = dpToPx(context, heightDp).coerceAtLeast(1)
-
         // Before the launcher reports a size, fall back to the 2×2 target cell.
         if (widthDp <= 0 || heightDp <= 0) {
-            w = dpToPx(context, 110)
-            h = dpToPx(context, 110)
+            return dpToPx(context, 110) to dpToPx(context, 110)
         }
+        return dpToPx(context, widthDp).coerceAtLeast(1) to dpToPx(context, heightDp).coerceAtLeast(1)
+    }
 
-        // Fit the board's aspect inside the widget so pieces keep their
-        // proportions — the same math the editor preview uses.
+    /**
+     * Fit the board's aspect inside the frame so pieces keep their proportions
+     * — the same math the editor preview uses.
+     */
+    private fun fitAspect(frameW: Int, frameH: Int, boardAspect: Float): Pair<Int, Int> {
+        var w = frameW
+        var h = frameH
         if (w.toFloat() / h > boardAspect) w = (h * boardAspect).roundToInt() else h = (w / boardAspect).roundToInt()
-
-        return clampPixels(w.coerceAtLeast(1), h.coerceAtLeast(1))
+        return w.coerceAtLeast(1) to h.coerceAtLeast(1)
     }
 
     private fun clampPixels(w: Int, h: Int): Pair<Int, Int> {
