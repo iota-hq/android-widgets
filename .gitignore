@@ -23,6 +23,8 @@ replay_pid*.log
 /tested2.md
 /idea.txt
 /image.png
+/ref/
+scratch_*.png
 
 # Release signing — never commit these.
 # The keystore IS your app's identity on Play: leak it and someone else can ship

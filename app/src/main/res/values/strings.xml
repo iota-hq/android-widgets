@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Collage Widget</string>
+    <string name="app_name">Picture Widget</string>
     <string name="widget_description">A hand-cut paper collage on your home screen.</string>
 
     <!-- Home / gallery -->
-    <string name="home_title">Collage Widget</string>
+    <string name="home_title">Picture Widget</string>
     <string name="home_empty_title">No collages yet</string>
     <string name="home_empty_body">Pick some photos and turn them into paper cutouts.</string>
     <string name="new_collage">New collage</string>
@@ -19,7 +19,7 @@
     <string name="send_to_back">Send to back</string>
     <string name="delete_piece">Delete</string>
     <string name="duplicate_piece">Duplicate</string>
-    <string name="pin_unsupported">This launcher can\'t add widgets automatically. Add Collage Widget from your home screen\'s widget list.</string>
+    <string name="pin_unsupported">This launcher can\'t add widgets automatically. Add Picture Widget from your home screen\'s widget list.</string>
 
     <!-- Add-to-home explainer -->
     <string name="add_to_home_title">Adding to your home screen</string>
@@ -41,14 +41,14 @@
     <string name="settings_feedback">Feedback</string>
     <string name="feedback_send">Send feedback</string>
     <string name="feedback_subtitle">Report a bug or suggest something</string>
-    <string name="feedback_subject">Collage Widget feedback (v%1$s)</string>
+    <string name="feedback_subject">Picture Widget feedback (v%1$s)</string>
     <string name="feedback_body">\n\n\n---\nApp version: %1$s\nDevice: %2$s\nAndroid: %3$s</string>
     <string name="feedback_no_mail_app">No email app found. Write to bikash13763@gmail.com</string>
 
     <!-- About -->
     <string name="settings_about">About</string>
     <string name="about_version">Version</string>
-    <string name="about_privacy">Collage Widget cuts out and renders every photo on your device. Nothing is uploaded, and no network is used.</string>
+    <string name="about_privacy">Picture Widget cuts out and renders every photo on your device. Nothing is uploaded, and no network is used.</string>
 
     <!-- Board settings -->
     <string name="board_shape">Shape</string>
@@ -85,5 +85,5 @@
 
     <!-- Widget setup -->
     <string name="widget_config_title">Choose a collage</string>
-    <string name="widget_config_empty">No collages yet. Open Collage Widget and make one first.</string>
+    <string name="widget_config_empty">No collages yet. Open Picture Widget and make one first.</string>
 </resources>
