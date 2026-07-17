@@ -1,4 +1,4 @@
-# Collage Widget
+# Picture Widget
 
 An Android app that turns your photos into hand-torn paper cutouts and arranges
 them as a collage on your home screen.

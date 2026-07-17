@@ -1,0 +1,23 @@
+SHORT DESCRIPTION (78/80 chars)
+Turn photos into hand-torn paper cutouts and pin a collage to your home screen
+
+FULL DESCRIPTION (1468/4000 chars)
+Picture Widget turns your photos into hand-torn paper cutouts and arranges them as a collage, right on your home screen.
+
+Pick a few photos and each one is cut out on-device, with no server and no upload. Every cutout gets an irregular, hand-torn paper edge. Arrange the pieces into a collage: drag, pinch, rotate, resize, and layer them however you like. Add a live clock that is ticked by the system, so it never costs battery. Then pin the finished collage to your home screen as a resizable widget.
+
+FEATURES
+- On-device photo cutout: your photos are processed entirely on your phone, never uploaded anywhere
+- Hand-torn paper styling for a tactile, collage-book look
+- Full manual control: drag, pinch, rotate, resize, reorder layers
+- Backgrounds: transparent, your own photo, gradients, or generated paper, cork, wood and linen textures
+- A live clock overlay you can place anywhere on the board
+- Text pieces, so you can add captions or labels to your collage
+- Prebuilt templates to start from
+- As many home screen widgets as you like, each with its own collage
+- Light and dark themes, with a choice of accent colours
+
+PRIVACY
+Picture Widget does not request internet access and does not collect, transmit, or store any personal data. Everything happens on your device: background removal, paper cutout rendering, and collage layout. See the privacy policy for details.
+
+Questions or feedback? Use the in-app Feedback option, or email bikash13763@gmail.com.
